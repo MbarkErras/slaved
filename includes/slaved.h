@@ -11,10 +11,12 @@
 # include <sys/types.h>
 # include <sys/time.h>
 
+# include <stdio.h>
+
 # include "centropy.h"
 # include "queue.h"
 
-# define PORT 1337
+# define PORT 1338
 # define LISTEN_QUEUE 1
 # define SLAVE_PROGRAM_NAME "slave_program"
 

@@ -45,7 +45,8 @@ void    *receive_requests(void *slave)
     i = -1;
     while (1)
     {
-        read(CAST(slave, t_slave *)->connection_fd, &request.type, sizeof(request.type));
+        if (read(CAST(slave, t_slave *)->connection_fd, &request.type, sizeof(request.type)) < 1)
+            continue ;
         read(CAST(slave, t_slave *)->connection_fd, &request.size, sizeof(request.size));
         request.data = malloc(sizeof(char) * request.size);
         while ((size_t)++i < request.size)
@@ -76,8 +77,9 @@ int connect_master(t_slave *slave)
         return (CONNECTION_ERR);
     while (1)
     {
-        if ((slave->connection_fd = accept(socket_fd, (struct sockaddr *)&master_address, &address_length)) != -1)
+        if ((slave->connection_fd = accept(socket_fd, (struct sockaddr *)&master_address, &address_length)) == -1)
             return (CONNECTION_ERR);
+        printf("here\n");
         pthread_create(&tid, NULL, receive_requests, slave);
         pthread_create(&tid, NULL, execute_requests, slave);
     }
