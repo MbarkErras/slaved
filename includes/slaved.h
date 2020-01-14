@@ -25,20 +25,6 @@ typedef struct  s_program
     int         r_stdout;
 }               t_program;
 
-
-typedef struct  s_request
-{
-    int         type;
-    size_t      size;
-    void        *data;
-}               t_request;
-
-# define PROGRAM 0
-void    execute_program_request(t_slave *slave, t_request *request);
-
-# define COMPUTATION 1
-void    *execute_computation_request(t_slave *slave, t_request *request, size_t *response_size);
-
 typedef struct  s_slave
 {
     int             connection_fd;
@@ -46,6 +32,19 @@ typedef struct  s_slave
     t_program       program;
     char            flags;
 }               t_slave;
+
+typedef struct  s_request
+{
+    int         type;
+    size_t      size;
+    void        *data;
+}               t_request; 
+
+# define PROGRAM 0
+void    execute_program_request(t_slave *slave, t_request *request);
+
+# define COMPUTATION 1
+void    *execute_computation_request(t_slave *slave, t_request *request, size_t *response_size);
 
 # define PROGRAM_RECEIVED 0
 # define ACCEPT_CONNECTION 1

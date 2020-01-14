@@ -18,10 +18,10 @@ void     *execute_requests(void *slave)
         {
             request = CAST(CAST(slave, t_slave *)->requests_queue.head->content, t_request *);
             if (request->type == PROGRAM)
-                execute_program_request(request);
+                execute_program_request(slave, request);
             else if (request->type == COMPUTATION)
             {
-                response = execute_computation_request(request, &response_size);
+                response = execute_computation_request(slave, request, &response_size);
                 write(CAST(slave, t_slave *)->connection_fd, &response_size, sizeof(response_size));
                 write(CAST(slave, t_slave *)->connection_fd, response, response_size);
             }
