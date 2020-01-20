@@ -10,13 +10,15 @@
 # include <arpa/inet.h>
 # include <sys/types.h>
 # include <sys/time.h>
-
-# include <stdio.h>
+# include <stdint.h>
 
 # include "centropy.h"
 # include "queue.h"
 
-# define PORT 1338
+# include "t_request.h"
+# include "t_response.h"
+
+# define PORT 1337
 # define LISTEN_QUEUE 1
 # define SLAVE_PROGRAM_NAME "slave_program"
 
@@ -35,21 +37,13 @@ typedef struct  s_slave
     char            flags;
 }               t_slave;
 
-typedef struct  s_request
-{
-    int         type;
-    size_t      size;
-    void        *data;
-}               t_request; 
+# define F_SLAVE_PROGRAM_RECEIVED 0
 
 # define PROGRAM 0
 void    execute_program_request(t_slave *slave, t_request *request);
 
 # define COMPUTATION 1
-void    *execute_computation_request(t_slave *slave, t_request *request, size_t *response_size);
-
-# define PROGRAM_RECEIVED 0
-# define ACCEPT_CONNECTION 1
+void    *execute_computation_request(t_program program, t_request *request, size_t *response_size);
 
 /*
 ** CONSTRUCTORS/DECONSTRUCTORS
@@ -63,8 +57,8 @@ void    destroy_request(void *request);
 */
 
 # define ERROR_WRAPPER(err, x) err ? err : x
-# define BAD_CONFIG 1
-# define CONNECTION_ERR 2
+# define CONNECTION_ERR 1
+# define IO_ERROR 2
 
 /*
 ** UTILITY MACROS
@@ -78,4 +72,14 @@ void    destroy_request(void *request);
 # define F_UNSET(x, f) (x &= ~(1 << f))
 # define F_BUNSET(x, f) (x &= ~f)
 
+////////////
+
+t_request   *create_request(t_request value);
+int         read_request(int fd, t_request *request);
+void        destroy_request(void *request);
+
+t_response  execute_req_init(t_slave *slave, t_request *request);
+t_response  execute_req_computation(t_program program, t_request *request, size_t *response_size);
+t_response  execute_finish_req();
+t_response  execute_drop_req();
 #endif

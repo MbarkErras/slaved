@@ -14,7 +14,7 @@ INCLUDES = includes $(LIBS_DIR)/centropy/includes $(LIBS_DIR)/cdata_structures/s
 OBJS_PATH=$(addprefix $(OBJS_DIR)/, $(OBJS))
 SRCS_PATH=$(addprefix $(SRCS_DIR)/, $(SRCS))
 
-FLAGS = -Wextra -Werror -Wall
+FLAGS = #-Wextra -Werror -Wall
 INCLUDES_FLAGS = $(addprefix -I, $(INCLUDES))
 
 all: $(NAME)
