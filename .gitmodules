@@ -1,6 +1,9 @@
-[submodule "libs/centropy"]
-	path = libs/centropy
-	url = https://github.com/MbarkErras/centropy.git
-[submodule "libs/cdata_structures"]
-	path = libs/cdata_structures
+[submodule "libraries/cdata_structures"]
+	path = libraries/cdata_structures
 	url = https://github.com/MbarkErras/cdata_structures.git
+[submodule "libraries/centropy"]
+	path = libraries/centropy
+	url = https://github.com/MbarkErras/centropy.git
+[submodule "libraries/packet"]
+	path = libraries/packet
+	url = https://github.com/MbarkErras/packet.git

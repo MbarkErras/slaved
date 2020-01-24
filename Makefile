@@ -1,15 +1,15 @@
 NAME = slaved
 
-SRCS_DIR = srcs
+SRCS_DIR = sources
 OBJS_DIR = build
-INCLUDES = includes libs/centropy/includes libs/cdata_structures/shared_includes
-LIBS_DIR = libs
+INCLUDES = includes libraries/centropy/includes libraries/cdata_structures/shared_includes libraries/packet/includes
+LIBS_DIR = libraries
 
 SRCS =	slaved.c \
-		request_execution.c \
-		t_request.c \
-		t_response.c
-OBJS = $(NAME_SRCS:.c=.o)
+		_requests_handlers.c \
+		error_handling.c 
+
+OBJS = $(SRCS:.c=.o)
 
 SRCS_PATHS = $(addprefix $(SRCS_DIR)/, $(SRCS))
 OBJS_PATHS = $(addprefix $(OBJS_DIR)/, $(OBJS))
@@ -22,7 +22,8 @@ all: $(NAME)
 $(NAME): $(OBJS_PATHS)
 	make -C $(LIBS_DIR)/centropy
 	make -C $(LIBS_DIR)/cdata_structures
-	gcc $(OBJS_PATHS) -o $(NAME)
+	make -C $(LIBS_DIR)/packet
+	gcc $(OBJS_PATHS) $(LIBS_DIR)/centropy/centropy.a $(LIBS_DIR)/cdata_structures/cdstruct.a $(LIBS_DIR)/packet/packet.a -o $(NAME)
 
 $(OBJS_PATHS): $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c | $(OBJS_DIR)
 	gcc $(INCLUDES_FLAGS) -c $< -o $@
@@ -33,7 +34,7 @@ $(OBJS_DIR):
 clean:
 	rm -rf $(OBJS_DIR)
 
-fclean:
+fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
