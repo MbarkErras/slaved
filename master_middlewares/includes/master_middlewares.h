@@ -1,15 +1,34 @@
 #ifndef MASTER_MIDDLEWARES_H
 # define MASTER_MIDDLEWARES_H
 
+# include <stdlib.h>
 # include <unistd.h>
 # include <fcntl.h>
-# include <stdlib.h>
+# include <pthread.h>
+# include <sys/socket.h>
+# include <netinet/in.h> 
+# include <arpa/inet.h>
+# include <sys/types.h>
+# include <sys/time.h>
+
+# include "centropy.h"
+# include "packet_utilities.h"
+# include "lists_wrappers.h"
+
+# include "error_wrapper.h"
+
+// /!\ D E V
+# include <stdio.h>
+# define DEBUG_P 1
+# define DEBUG(x) printf(DEBUG_P ? x : "")
+// /!\ D E V
 
 # define BUFFER_SIZE 69
+# define PORT 1337
 
 typedef struct	s_slave
 {
-	char		ip[16];
+	char		*ip;
 	int			socket;
 }				t_slave;
 
@@ -19,6 +38,20 @@ typedef struct	s_cluster
 	size_t		size;
 	int			program;
 }				t_cluster;
+
+typedef struct	s_task
+{
+	void		*input;
+	void		*output;
+	int			done;
+}				t_task;
+
+typedef struct	s_computation
+{
+	t_task		*tasks;
+	size_t		size;
+	int			done;
+}				t_computation;
 
 /*
 ** CONFIGURATION UTILITITES

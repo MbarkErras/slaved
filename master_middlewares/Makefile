@@ -7,21 +7,23 @@ OBJS = $(SRCS:.c=.o)
 
 SRCS_DIR = sources
 OBJS_DIR = build
-INCLUDES = includes
+LIBS_DIR = ../libraries
+INCLUDES = includes $(LIBS_DIR)/centropy/includes $(LIBS_DIR)/cdata_structures/shared_includes $(LIBS_DIR)/packet/includes
 
 SRCS_PATH = $(addprefix $(SRCS_DIR)/, $(SRCS))
 OBJS_PATH = $(addprefix $(OBJS_DIR)/, $(OBJS))
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = #-Wall -Wextra -Werror
+INCLUDES_FLAGS = $(addprefix -I, $(INCLUDES))
 
 all: $(NAME)
 
 $(NAME): $(OBJS_PATH)
-	ar rc $(NAME) $(OBJS_PATH)
+	ar rc $(NAME) $(OBJS_PATH) 
 	ranlib $(NAME)
 
 $(OBJS_PATH): $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c | $(OBJS_DIR)
-	gcc $(FLAGS) -I$(INCLUDES) -c $< -o $@
+	gcc $(FLAGS) $(INCLUDES_FLAGS) -c $< -o $@
 
 $(OBJS_DIR):
 	mkdir $(OBJS_DIR)
