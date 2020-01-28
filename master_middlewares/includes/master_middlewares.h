@@ -30,6 +30,7 @@ typedef struct	s_slave
 {
 	char		*ip;
 	int			socket;
+	t_dstruct_list	tasks_queue;
 }				t_slave;
 
 typedef struct	s_cluster
@@ -43,13 +44,12 @@ typedef struct	s_task
 {
 	void		*input;
 	void		*output;
-	int			done;
+	int			flags;
 }				t_task;
 
 typedef struct	s_computation
 {
-	t_task		*tasks;
-	size_t		size;
+	t_dstruct_list	tasks_queue;
 	int			done;
 }				t_computation;
 
