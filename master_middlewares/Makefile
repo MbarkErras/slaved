@@ -1,7 +1,9 @@
 NAME = master_middlewares.a
 
 SRCS =	master_middlewares.c \
-		configuration_utilities.c
+		configuration_utilities.c \
+		computation_handlers.c \
+		file_io.c
 
 OBJS = $(SRCS:.c=.o)
 

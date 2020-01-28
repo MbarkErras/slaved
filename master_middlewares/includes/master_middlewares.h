@@ -14,8 +14,11 @@
 # include "centropy.h"
 # include "packet_utilities.h"
 # include "lists_wrappers.h"
+# include "queue.h"
 
 # include "error_wrapper.h"
+
+# include "_requests_handlers.h"
 
 // /!\ D E V
 # include <stdio.h>
@@ -26,32 +29,38 @@
 # define BUFFER_SIZE 69
 # define PORT 1337
 
+typedef struct s_cluster t_cluster;
+
 typedef struct	s_slave
 {
 	char		*ip;
 	int			socket;
 	t_dstruct_list	tasks_queue;
+	t_cluster		*cluster;
 }				t_slave;
-
-typedef struct	s_cluster
-{
-	t_slave		**nodes;
-	size_t		size;
-	int			program;
-}				t_cluster;
-
-typedef struct	s_task
-{
-	void		*input;
-	void		*output;
-	int			flags;
-}				t_task;
 
 typedef struct	s_computation
 {
 	t_dstruct_list	tasks_queue;
-	int			done;
+	t_dstruct_list	done_queue;
 }				t_computation;
+
+typedef struct	s_cluster
+{
+	t_slave		**nodes;
+	t_slave		*least_used_slave;
+	size_t		size;
+	int			program;
+	t_computation	computation;
+}				t_cluster;
+
+typedef struct	s_task
+{
+	t_packet	*request;
+	t_packet	*response;
+}				t_task;
+
+
 
 /*
 ** CONFIGURATION UTILITITES
@@ -63,6 +72,13 @@ typedef struct	s_computation
 # define DOTS 3
 
 int         get_configuration(char *configuration_file, t_cluster *cluster);
+char		*read_file(int fd, size_t *size);
+
+/*
+** CLUSTER LOADBALANCER
+*/
+
+t_slave *get_available_slave(t_cluster *cluster);
 
 /*
 ** ERROR HANDLING
