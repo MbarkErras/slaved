@@ -57,13 +57,11 @@ static int get_program_fd(char *entry)
     int     fd;
 
     if (!entry || !(colon = ft_strchr(entry, ':')))
-        return (1);
+        return (-1);
     *colon = 0;
     if (ft_strcmp(entry, "path"))
-        return (1);
-    if ((fd = open(colon + 1, O_RDONLY)) == -1)
-        return (1);
-    return (fd);
+        return (-1);
+    return (open(colon + 1, O_RDONLY));
 }
 
 static int  assign_nodes_addresses(char **configuration_lines, t_cluster *cluster)
@@ -78,10 +76,11 @@ static int  assign_nodes_addresses(char **configuration_lines, t_cluster *cluste
             return (1);
         cluster->size++;
     }
-    if (!(cluster->nodes = (t_slave **)malloc(sizeof(t_slave *) * cluster->size)))
+    if (!(cluster->nodes = (t_slave *)malloc(sizeof(t_slave) * cluster->size)))
         return (1);
     while (++i < cluster->size)
-        cluster->nodes[i]->ip = configuration_lines[i + 1];
+        cluster->nodes[i].ip = configuration_lines[i + 1];
+    DEBUG("assigning addresses to nodes..\n");
     return (0);
 }
 
@@ -89,14 +88,18 @@ int         get_configuration(char *configuration_file, t_cluster *cluster)
 {
     char    **configuration_lines;
 
+    DEBUG("reading configuration file..\n");
     if (!(configuration_lines = read_configuration_file(configuration_file)))
         return (BAD_CONFIG);
-    if (!((cluster->program = get_program_fd(configuration_lines[0])) &&
-        !assign_nodes_addresses(configuration_lines, cluster)))
+    DEBUG("getting program fd, assigning nodes addresses..\n");
+    if ((cluster->program = get_program_fd(configuration_lines[0])) == -1 ||
+        assign_nodes_addresses(configuration_lines, cluster))
     {
+        DEBUG("ERROR: getting program fd, assigning nodes addresses..\n");
         free_char_array(configuration_lines);
         return (BAD_CONFIG);
     }
+    DEBUG("configuration parsing cleanup..\n");
     ft_strdel(&configuration_lines[0]);
     free(configuration_lines);
     return (0);

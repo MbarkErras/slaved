@@ -23,7 +23,7 @@ $(NAME): $(OBJS_PATHS)
 	make -C $(LIBS_DIR)/centropy
 	make -C $(LIBS_DIR)/cdata_structures
 	make -C $(LIBS_DIR)/packet
-	gcc $(OBJS_PATHS) $(LIBS_DIR)/centropy/centropy.a $(LIBS_DIR)/cdata_structures/cdstruct.a $(LIBS_DIR)/packet/packet.a -o $(NAME)
+	gcc $(OBJS_PATHS) $(LIBS_DIR)/centropy/centropy.a $(LIBS_DIR)/cdata_structures/cdstruct.a $(LIBS_DIR)/packet/packet.a -lpthread -o $(NAME)
 
 $(OBJS_PATHS): $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c | $(OBJS_DIR)
 	gcc $(INCLUDES_FLAGS) -c $< -o $@

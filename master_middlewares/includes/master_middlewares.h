@@ -47,7 +47,7 @@ typedef struct	s_computation
 
 typedef struct	s_cluster
 {
-	t_slave		**nodes;
+	t_slave		*nodes;
 	t_slave		*least_used_slave;
 	size_t		size;
 	int			program;
@@ -60,7 +60,9 @@ typedef struct	s_task
 	t_packet	*response;
 }				t_task;
 
-
+int init_cluster(char *configuration_file, t_cluster *cluster);
+void    init_computation(t_cluster *cluster);
+t_task  *create_task(t_task value);
 
 /*
 ** CONFIGURATION UTILITITES
@@ -72,7 +74,7 @@ typedef struct	s_task
 # define DOTS 3
 
 int         get_configuration(char *configuration_file, t_cluster *cluster);
-char		*read_file(int fd, size_t *size);
+char		*read_file(int fd, uint32_t *size);
 
 /*
 ** CLUSTER LOADBALANCER

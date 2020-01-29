@@ -23,6 +23,13 @@
 
 # include "_requests_handlers.h"
 
+// /!\ D E V
+# include <stdio.h>
+# include <errno.h>
+# define DEBUG_P 1
+# define DEBUG(x) printf(DEBUG_P ? x : "")
+// /!\ D E V
+
 typedef struct  s_program
 {
     pid_t       pid;

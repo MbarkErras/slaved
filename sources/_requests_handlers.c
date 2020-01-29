@@ -20,7 +20,7 @@ t_packet  execute_req_init(t_slaved *slaved, t_packet *request)
         close(stdin_pipe[0]);
         dup2(stdin_pipe[1], 1);
         close(stdin_pipe[1]);
-        if (execve(SLAVED_PROGRAM_NAME, NULL, NULL) == -1)
+        if (execv(SLAVED_PROGRAM_NAME, (char *[2]){SLAVED_PROGRAM_NAME, NULL}) == -1)
             exit (0);
     }
     else if (slaved->program.pid == -1)

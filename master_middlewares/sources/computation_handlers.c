@@ -15,6 +15,7 @@ void    init_computation(t_cluster *cluster)
 {
     cluster->computation.tasks_queue = t_dstruct_list_init();
     cluster->computation.done_queue = t_dstruct_list_init();
+    DEBUG("computation initiated!..\n");
 }
 
 void    queue_task(t_cluster *cluster, t_packet *request)

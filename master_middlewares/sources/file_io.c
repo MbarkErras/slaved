@@ -1,6 +1,6 @@
 #include "master_middlewares.h"
 
-char    *read_file(int fd, size_t *size)
+char    *read_file(int fd, uint32_t *size)
 {
     char    buffer[BUFFER_SIZE];
     struct  stat file_stat;
@@ -15,7 +15,7 @@ char    *read_file(int fd, size_t *size)
     offset = 0;
     while ((read_return = read(fd, buffer, BUFFER_SIZE - 1)) > 0)
     {
-        memcpy(content + offset, buffer, read_return);
+        ft_memcpy(content + offset, buffer, read_return);
         offset += read_return;
     }
     return (content);
