@@ -62,6 +62,7 @@ typedef struct	s_task
 
 int init_cluster(char *configuration_file, t_cluster *cluster);
 void    init_computation(t_cluster *cluster);
+void    queue_task(t_cluster *cluster, t_packet *request);
 t_task  *create_task(t_task value);
 
 /*

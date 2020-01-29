@@ -79,7 +79,10 @@ static int  assign_nodes_addresses(char **configuration_lines, t_cluster *cluste
     if (!(cluster->nodes = (t_slave *)malloc(sizeof(t_slave) * cluster->size)))
         return (1);
     while (++i < cluster->size)
+    {
         cluster->nodes[i].ip = configuration_lines[i + 1];
+        cluster->nodes[i].tasks_queue = t_dstruct_list_init();
+    }
     DEBUG("assigning addresses to nodes..\n");
     return (0);
 }

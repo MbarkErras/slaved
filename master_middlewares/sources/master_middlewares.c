@@ -10,13 +10,7 @@ int init_slaves(t_cluster *cluster)
     request.type = TYPE_T_REQUEST_INIT;
     err = ERROR_WRAPPER((request.data = read_file(cluster->program, &request.size)) == NULL);
     if (!err)
-        queue_enqueue(&cluster->computation.tasks_queue,
-            t_dstruct_create_node(
-                create_task((t_task)
-                    {create_packet(request),
-                    create_packet(
-                        (t_packet){0,0, NULL})}),
-                sizeof(t_task)));
+        queue_task(cluster, create_packet(request));
     if (!err)
         DEBUG("\tslaves_initiated!..\n");
     return (err);
@@ -33,6 +27,7 @@ int init_slaves(t_cluster *cluster)
 void    *slave_routine(void *slave)
 {
     t_dstruct_node *task;
+    t_packet        response;
     int             err;
 
     err = 0;
@@ -45,19 +40,17 @@ void    *slave_routine(void *slave)
         DEBUG("\t\tpicking a task!..\n");
         while (write_packet(CAST(slave, t_slave *)->socket, *CAST(task->content, t_task *)->request))
             continue ;
-        char c;
-        read(CAST(slave, t_slave *)->socket, &c, 1);
-        printf(">>>>>>>>>>>> %c\n", c);
-        /*
-        while (read_packet(CAST(slave, t_slave *)->socket, CAST(task->content, t_task *)->response))
-            continue ;
+        err = read_packet(CAST(slave, t_slave *)->socket, &response);
+        printf("ERR: %d\n", err);
+        CAST(task->content, t_task *)->response = create_packet(response);
         if (CAST(task->content, t_task *)->response->type == TYPE_T_RESPONSE_SUCCESS)
             queue_enqueue(&CAST(slave, t_slave *)->cluster->computation.done_queue, task);
         else
+        {
+            //free failure response
             queue_enqueue(&CAST(slave, t_slave *)->cluster->computation.tasks_queue, task);
-        */
+        }
         queue_dequeue(&CAST(slave, t_slave *)->tasks_queue, NULL);
-        sleep(1);
         // if (CAST(slave, t_slave *)->tasks_queue.size <
             // CAST(slave, t_slave *)->cluster->least_used_slave->tasks_queue.size)
             // CAST(slave, t_slave *)->cluster->least_used_slave = slave;
