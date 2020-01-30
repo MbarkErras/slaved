@@ -20,3 +20,4 @@ char    *read_file(int fd, uint32_t *size)
     }
     return (content);
 }
+

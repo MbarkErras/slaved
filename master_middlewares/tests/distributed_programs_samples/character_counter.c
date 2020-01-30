@@ -12,21 +12,21 @@ int main()
 
 	read(0, &size, sizeof(uint32_t));
 
-	// printf("size: %d\n", size);
+	// printf("\nsize: %d\n", size);
 	content = malloc(sizeof(char) * size);
 	read(0, content, size);
 
-	// printf("input: %s\n", content);
+	// printf("\ninput: %s\n", content);
 	result = 0;
 	i = -1;
 	while (++i < size)
 		result += content[i];
 	size = sizeof(result);
 
-	// printf("size: %d\n", size);
+	// printf("\nsize: %d\n", size);
 	write(1, &size, sizeof(uint32_t));
 
-	// printf("output: %ld\n", result);
+	// printf("\noutput: %ld\n", result);
 	write(1, &result, size);
 	return (0);
 }

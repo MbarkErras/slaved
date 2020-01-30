@@ -15,13 +15,13 @@ INCLUDES = includes $(LIBS_DIR)/centropy/includes $(LIBS_DIR)/cdata_structures/s
 SRCS_PATH = $(addprefix $(SRCS_DIR)/, $(SRCS))
 OBJS_PATH = $(addprefix $(OBJS_DIR)/, $(OBJS))
 
-FLAGS = #-Wall -Wextra -Werror
+FLAGS = -g #-Wall -Wextra -Werror
 INCLUDES_FLAGS = $(addprefix -I, $(INCLUDES))
 
 all: $(NAME)
 
 $(NAME): $(OBJS_PATH)
-	ar rc $(NAME) $(OBJS_PATH) 
+	ar rc $(NAME) $(OBJS_PATH)
 	ranlib $(NAME)
 
 $(OBJS_PATH): $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c | $(OBJS_DIR)
