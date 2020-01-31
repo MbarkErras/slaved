@@ -7,14 +7,14 @@ LIBS_DIR = libraries
 
 SRCS =	slaved.c \
 		_requests_handlers.c \
-		error_handling.c 
+		error_handling.c
 
 OBJS = $(SRCS:.c=.o)
 
 SRCS_PATHS = $(addprefix $(SRCS_DIR)/, $(SRCS))
 OBJS_PATHS = $(addprefix $(OBJS_DIR)/, $(OBJS))
 
-FLAGS = #-Wall -Wextra -Werror
+FLAGS = -g #-Wall -Wextra -Werror
 INCLUDES_FLAGS = $(addprefix -I, $(INCLUDES))
 
 all: $(NAME)
@@ -23,10 +23,10 @@ $(NAME): $(OBJS_PATHS)
 	make -C $(LIBS_DIR)/centropy
 	make -C $(LIBS_DIR)/cdata_structures
 	make -C $(LIBS_DIR)/packet
-	gcc $(OBJS_PATHS) $(LIBS_DIR)/centropy/centropy.a $(LIBS_DIR)/cdata_structures/cdstruct.a $(LIBS_DIR)/packet/packet.a -lpthread -o $(NAME)
+	gcc $(FLAGS) $(OBJS_PATHS) $(LIBS_DIR)/centropy/centropy.a $(LIBS_DIR)/cdata_structures/cdstruct.a $(LIBS_DIR)/packet/packet.a -lpthread -o $(NAME)
 
 $(OBJS_PATHS): $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c | $(OBJS_DIR)
-	gcc $(INCLUDES_FLAGS) -c $< -o $@
+	gcc $(FLAGS) $(INCLUDES_FLAGS) -c $< -o $@
 
 $(OBJS_DIR):
 	mkdir $(OBJS_DIR)

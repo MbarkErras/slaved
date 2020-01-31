@@ -67,6 +67,7 @@ static int get_program_fd(char *entry)
 static int  assign_nodes_addresses(char **configuration_lines, t_cluster *cluster)
 {
     int i;
+    int status;
 
     i = -1;
     cluster->size = 0;
@@ -80,6 +81,7 @@ static int  assign_nodes_addresses(char **configuration_lines, t_cluster *cluste
         return (1);
     while (++i < cluster->size)
     {
+        status = pthread_mutex_init(&cluster->nodes[i].mutex, NULL);
         cluster->nodes[i].ip = configuration_lines[i + 1];
         cluster->nodes[i].tasks_queue = t_dstruct_list_init();
         cluster->nodes[i].cluster = cluster;

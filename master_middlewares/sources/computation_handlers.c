@@ -13,13 +13,21 @@ t_task  *create_task(t_task value)
 
 void    init_computation(t_cluster *cluster)
 {
+    int status;
+
+    status = pthread_mutex_init(&cluster->computation.mutex, NULL);
     cluster->computation.tasks_queue = t_dstruct_list_init();
     cluster->computation.done_queue = t_dstruct_list_init();
-    DEBUG("computation initiated!..\n");
+    printf("computation initiated!.%d.\n", status);
 }
 
 void    queue_task(t_cluster *cluster, t_packet *request)
 {
+
+    pthread_mutex_lock(&cluster->computation.mutex);
+    DEBUG("XXXX XENGUEUUDFA A TASK X XXXX..\n");
     queue_enqueue(&cluster->computation.tasks_queue,
         t_dstruct_create_node(create_task((t_task){request, NULL}), sizeof(t_task)));
+    cluster->computation.size++;
+    pthread_mutex_unlock(&cluster->computation.mutex);
 }

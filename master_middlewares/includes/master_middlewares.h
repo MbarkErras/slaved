@@ -33,6 +33,7 @@ typedef struct s_cluster t_cluster;
 
 typedef struct	s_slave
 {
+	pthread_mutex_t	mutex;
 	char		*ip;
 	int			socket;
 	t_dstruct_list	tasks_queue;
@@ -41,8 +42,10 @@ typedef struct	s_slave
 
 typedef struct	s_computation
 {
+	pthread_mutex_t	mutex;
 	t_dstruct_list	tasks_queue;
 	t_dstruct_list	done_queue;
+	int				size;
 }				t_computation;
 
 typedef struct	s_cluster

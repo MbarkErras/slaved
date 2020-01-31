@@ -1,23 +1,25 @@
 #include "slaved.h"
 
-void    *handle_packets(void *slaved)
+int     handle_packets(t_slaved *slaved)
 {
     t_packet response;
 
     DEBUG("handling packets..\n");
     while (1)
     {
-        if (!CAST(slaved, t_slaved *)->packets_queue.size)
+        if (!slaved->packets_queue.size)
             continue ;
         else
         {
+            DEBUG("executing a packet..\n");
             response = requests_dispatcher(
-                CAST(slaved, t_slaved *)->packets_queue.head->content, slaved);
-            write_packet(CAST(slaved, t_slaved *)->connection_socket, response);
-            queue_dequeue(&CAST(slaved, t_slaved *)->packets_queue, destroy_packet);
+                slaved->packets_queue.head->content, slaved);
+            DEBUG("writing response..\n");
+            write_packet(slaved->connection_socket, response);
+            queue_dequeue(&slaved->packets_queue, destroy_packet);
         }
     }
-    return (NULL);
+    return (0);
 }
 
 void    receive_packets(t_slaved *slaved)
@@ -28,6 +30,7 @@ void    receive_packets(t_slaved *slaved)
     DEBUG("receiving packets..\n");
     while (1)
     {
+        DEBUG("reading a packet..\n");
         if (read_packet(slaved->connection_socket, &request))
         {
             DEBUG("error: read_packet()\n");
@@ -36,43 +39,38 @@ void    receive_packets(t_slaved *slaved)
         }
         DEBUG("a packet receieved!..\n");
         printf("type: %d\nsize: %d\n", request.type, request.size);
-        write(1, request.data, request.size);
-        queue_enqueue(&slaved->packets_queue, 
-            t_dstruct_create_node(create_packet(request), sizeof(t_packet)));
+        queue_enqueue(&slaved->packets_queue,
+            t_dstruct_create_node(create_packet(request, NULL), sizeof(t_packet)));
     }
 
 }
 
-
-int                 socket_fd;
-
-int connect_master(t_slaved *slaved)
+void    *connect_master(void *slaved)
 {
-    int                 socket_fd;
     struct sockaddr_in  slave_address;
     struct sockaddr_in  master_address;
     socklen_t           address_length;
 
-    if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        return (1);
+    if ((CAST(slaved, t_slaved *)->server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        /*pthread_exit(NULL);*/exit(1);
     ft_bzero(&slave_address, sizeof(slave_address));
     ft_bzero(&master_address, sizeof(master_address));
-    slave_address.sin_family = AF_INET; 
-    slave_address.sin_addr.s_addr = htonl(INADDR_ANY); 
+    slave_address.sin_family = AF_INET;
+    slave_address.sin_addr.s_addr = htonl(INADDR_ANY);
     slave_address.sin_port = htons(PORT);
-    if ((bind(socket_fd, (struct sockaddr *)&slave_address, sizeof(slave_address))) != 0)
-        return (2);
-    if (listen(socket_fd, 1) != 0)
-        return (3);
+    if (bind(CAST(slaved, t_slaved *)->server_socket, (struct sockaddr *)&slave_address,
+        sizeof(slave_address)) ||
+        listen(CAST(slaved, t_slaved *)->server_socket, 1))
+        /*pthread_exit(NULL);*/exit(2);
     while (1)
     {
-        if ((slaved->connection_socket =
-            accept(socket_fd, (struct sockaddr *)&master_address, &address_length)) == -1)
-            return (4);
+        if ((CAST(slaved, t_slaved *)->connection_socket =
+            accept(CAST(slaved, t_slaved *)->server_socket, (struct sockaddr *)
+            &master_address, &address_length)) == -1)
+        /*pthread_exit(NULL);*/exit(3);
         DEBUG("connecting master..\n");
         receive_packets(slaved);
     }
-    close(socket_fd);
 }
 
 int main(void)
@@ -81,14 +79,10 @@ int main(void)
     pthread_t   tid;
     int         err;
 
+    err = 0;
     slaved.packets_queue = t_dstruct_list_init();
-    pthread_create(&tid, NULL, handle_packets, &slaved);
-    if ((err = connect_master(&slaved)))
-    {
-        close(socket_fd);
-        return (ft_perror(EXEC_NAME, NULL, err));
-    }
 
-    while (1)
-        continue ;
+    err = ERROR_WRAPPER(pthread_create(&tid, NULL, connect_master, &slaved));
+    err = ERROR_WRAPPER(handle_packets(&slaved));
+    return (err);
 }

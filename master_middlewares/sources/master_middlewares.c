@@ -10,7 +10,9 @@ int init_slaves(t_cluster *cluster)
     request.type = TYPE_T_REQUEST_INIT;
     err = ERROR_WRAPPER((request.data = read_file(cluster->program, &request.size)) == NULL);
     if (!err)
+    {
         queue_task(cluster, create_packet(request, NULL));
+    }
     if (!err)
         DEBUG("\tslaves_initiated!..\n");
     return (err);
@@ -35,9 +37,15 @@ void    *slave_routine(void *slave)
     DEBUG("running slave routine..\n");
     while (1)
     {
-        if (!CAST(slave, t_slave *)->tasks_queue.size)
+        pthread_mutex_lock(&CAST(slave, t_slave *)->mutex);
+        if (!CAST(slave, t_slave *)->tasks_queue.head)
+        {
+            pthread_mutex_unlock(&CAST(slave, t_slave *)->mutex);
             continue ;
+        }
         task = CAST(slave, t_slave *)->tasks_queue.head;
+        queue_dequeue(&CAST(slave, t_slave *)->tasks_queue, NULL);
+        pthread_mutex_unlock(&CAST(slave, t_slave *)->mutex);
         DEBUG("\t\tpicking a task!..\n");
         if (write_packet(CAST(slave, t_slave *)->socket, *(CAST(task->content, t_task *)->request)))
         {
@@ -49,7 +57,11 @@ void    *slave_routine(void *slave)
             DEBUG("\nXXX\terror reading to master, exiting nodes thread\n");
             pthread_exit(NULL);
         }
+        printf("output size: %d\n", response.size);
+        write(1, "OUTPUT:", 7);
+        write(1, response.data, response.size);
         CAST(task->content, t_task *)->response = create_packet(response, NULL);
+        pthread_mutex_lock(&CAST(slave, t_slave *)->cluster->computation.mutex);
         if (CAST(task->content, t_task *)->response->type == TYPE_T_RESPONSE_SUCCESS)
         {
             printf("\tsuccessful task execution\n");
@@ -59,12 +71,14 @@ void    *slave_routine(void *slave)
         {
             printf("\tfailed task execution\n");
             //free failure response
-            queue_enqueue(&CAST(slave, t_slave *)->cluster->computation.tasks_queue, task);
+            queue_enqueue(&(CAST(slave, t_slave *)->cluster->computation.tasks_queue), task);
         }
-        queue_dequeue(&CAST(slave, t_slave *)->tasks_queue, NULL);
+        pthread_mutex_unlock(&CAST(slave, t_slave *)->cluster->computation.mutex);
+        pthread_mutex_lock(&CAST(slave, t_slave *)->cluster->least_used_slave->mutex);
         if (CAST(slave, t_slave *)->tasks_queue.size <
             CAST(slave, t_slave *)->cluster->least_used_slave->tasks_queue.size)
             CAST(slave, t_slave *)->cluster->least_used_slave = slave;
+        pthread_mutex_unlock(&CAST(slave, t_slave *)->cluster->least_used_slave->mutex);
     }
 }
 
@@ -115,18 +129,32 @@ void    *cluster_loadbalancer(void *cluster)
     DEBUG("running loadbalancer routine..\n");
     while (1)
     {
-        if (!CAST(cluster, t_cluster *)->computation.tasks_queue.size)
+        pthread_mutex_lock(&CAST(cluster, t_cluster *)->computation.mutex);
+        if (!CAST(cluster, t_cluster *)->computation.tasks_queue.head)
+        {
+            pthread_mutex_unlock(&CAST(cluster, t_cluster *)->computation.mutex);
             continue ;
+        }
+        printf("A WORKLOAD IS AVAILABLE..\n");
         task = CAST(cluster, t_cluster *)->computation.tasks_queue.head;
+        queue_dequeue(&CAST(cluster, t_cluster *)->computation.tasks_queue, NULL);
+        pthread_mutex_unlock(&CAST(cluster, t_cluster *)->computation.mutex);
         if (CAST(task->content, t_task *)->request->type == TYPE_T_REQUEST_INIT)
         {
             i = -1;
             while (++i < CAST(cluster, t_cluster *)->size)
+            {
+                pthread_mutex_lock(&CAST(cluster, t_cluster *)->nodes[i].mutex);
                 queue_enqueue(&CAST(cluster, t_cluster *)->nodes[i].tasks_queue, task);
+                pthread_mutex_unlock(&CAST(cluster, t_cluster *)->nodes[i].mutex);
+            }
         }
         else
+        {
+            pthread_mutex_lock(&CAST(cluster, t_cluster *)->least_used_slave->mutex);
             queue_enqueue(&CAST(cluster, t_cluster *)->least_used_slave->tasks_queue, task);
-        queue_dequeue(&CAST(cluster, t_cluster *)->computation.tasks_queue, NULL);
+            pthread_mutex_unlock(&CAST(cluster, t_cluster *)->least_used_slave->mutex);
+        }
     }
 }
 
@@ -145,6 +173,7 @@ int init_cluster(char *configuration_file, t_cluster *cluster)
     err = ERROR_WRAPPER(get_configuration(configuration_file, cluster) != 0);
     if (!cluster->size)
         return (1);
+    cluster->least_used_slave = &cluster->nodes[0];
     err = ERROR_WRAPPER(connect_slaves(cluster) != 0);
     if (!err)
         init_computation(cluster);

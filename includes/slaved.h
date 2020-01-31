@@ -6,7 +6,7 @@
 # include <fcntl.h>
 # include <pthread.h>
 # include <sys/socket.h>
-# include <netinet/in.h> 
+# include <netinet/in.h>
 # include <arpa/inet.h>
 # include <sys/types.h>
 # include <sys/time.h>
@@ -39,6 +39,7 @@ typedef struct  s_program
 
 typedef struct  s_slaved
 {
+    int             server_socket;
     int             connection_socket;
     t_dstruct_list  packets_queue;
     t_program       program;
