@@ -16,8 +16,9 @@
  - threads are cool.
  - to put a mutex in everything.
  - to dequeue a node before enqueuing it to some other queue.
- 
+   
+   
  <p align="center">
-  <img src="https://i.imgur.com/06GvAzp.png" width=500>
+  <img src="https://i.imgur.com/06GvAzp.png" width=420>
 </p>
 
