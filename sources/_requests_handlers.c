@@ -59,17 +59,35 @@ t_packet  execute_req_computation(t_packet *request, t_program program)
 {
     t_packet response;
     void    *result;
+    int     ret;
 
     DEBUG("\t\texecuting a computation request..\n");
     DEBUG("\twriting input size to program..\n");
-    write(program.w_stdin, &request->size, sizeof(request->size));
+
+    ret = write(program.w_stdin, &request->size, sizeof(request->size));
+
+    printf(">>> %d\n", ret);
+
     DEBUG("\twriting input to program..\n");
-    write(program.w_stdin, request->data, request->size);
+
+    printf("data: %*s\n", request->size, request->data);
+    ret = write(program.w_stdin, request->data, request->size);
+
+    printf(">>> %d, %s\n", ret, strerror(errno));
+
     DEBUG("\treading output size..\n");
-    read(program.r_stdout, &response.size, sizeof(uint32_t));
+
+    ret = read(program.r_stdout, &response.size, sizeof(uint32_t));
     response.data = malloc(sizeof(char) * response.size);
+
+    printf(">>> %d\n", ret);
+
     DEBUG("\treading output data..\n");
-    read(program.r_stdout, response.data, response.size);
+
+    ret = read(program.r_stdout, response.data, response.size);
+
+    printf(">>> %d\n", ret);
+    response.type = TYPE_T_RESPONSE_SUCCESS;
     return (response);
 }
 

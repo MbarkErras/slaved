@@ -54,12 +54,16 @@ void    *slave_routine(void *slave)
         }
         if (read_packet(CAST(slave, t_slave *)->socket, &response))
         {
-            DEBUG("\nXXX\terror reading to master, exiting nodes thread\n");
+            DEBUG("\nXXX\terror reading from master, exiting nodes thread\n");
             pthread_exit(NULL);
         }
+        //
+        printf("type value: %d\n", response.type);
         printf("output size: %d\n", response.size);
-        write(1, "OUTPUT:", 7);
-        write(1, response.data, response.size);
+        long long result;
+        memcpy(&result, response.data, response.size);
+        printf("result: %lld\n", result);
+        //
         CAST(task->content, t_task *)->response = create_packet(response, NULL);
         pthread_mutex_lock(&CAST(slave, t_slave *)->cluster->computation.mutex);
         if (CAST(task->content, t_task *)->response->type == TYPE_T_RESPONSE_SUCCESS)
@@ -110,7 +114,10 @@ int connect_slaves(t_cluster *cluster)
         err = ERROR_WRAPPER(connect(slave_socket, (struct sockaddr *)&slave, sizeof(slave)) != 0);
         cluster->nodes[i].socket = err ? -1 : slave_socket;
         if (err)
+        {
+            printf("ERROR CONNECTING SLAVE NO %d\n", i);
             continue ;
+        }
         err = ERROR_WRAPPER(pthread_create(&tid, NULL, slave_routine, &(cluster->nodes[i])));
     }
     return (0);

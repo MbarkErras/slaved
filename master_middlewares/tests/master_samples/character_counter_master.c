@@ -53,17 +53,24 @@ int main(int argc, char **argv)
         t_packet request;
         request.type = TYPE_T_REQUEST_COMPUTATION;
         request.size = quota;
-        DEBUG("reading a segment of input file..\n");
         request.data = file_partial_read(fd, (int *)&request.size);
-        printf("data dzeb: %s\n", request.data);
-        DEBUG("queuing task..\n");
-        printf("## sent data %s\n", request.data);
         queue_task(&cluster, create_packet(request, NULL));
     }
     DEBUG("waiting for computation result..\n");
     while (cluster.computation.size != cluster.computation.done_queue.size)
         continue ;
     //collect the result
+    t_dstruct_node *s;
+    long long result;
+    long long temp;
+    s = cluster.computation.done_queue.head;
+    while (s)
+    {
+        memcpy(&temp, CAST(s->content, t_task *)->response->data, sizeof(temp));
+        result += temp;
+        s = s->next;
+    }
+    printf("computation is done, result: %lld\n", result);
     while (1)
         continue;
 }

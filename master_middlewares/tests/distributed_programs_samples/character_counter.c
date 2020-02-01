@@ -9,16 +9,17 @@ int main()
 	int i;
 	char	*content;
 	uint64_t result;
+	int ret;
 
 	FILE *fd = fopen("/dev/ttys000", "w");
 
-	read(0, &size, sizeof(uint32_t));
+	ret = read(0, &size, sizeof(uint32_t));
 
-	fprintf(fd, "\nsize: %d\n", size);
+	fprintf(fd, "\nsize: %d, ret: %d\n", size, ret);
 	content = malloc(sizeof(char) * size);
-	read(0, content, size);
+	ret = read(0, content, size);
 
-	fprintf(fd, "\ninput: %s\n", content);
+	fprintf(fd, "\ninput: %s, ret: %d\n", content, ret);
 	result = 0;
 	i = -1;
 	while (++i < size)
