@@ -45,6 +45,7 @@ int main(int argc, char **argv)
     if (init_cluster(argv[2], &cluster))
         exit (3);
     printf("success: init_cluster()..\n");
+    printf("--> %zu\n", cluster.size);
     i = -1;
     int quota = cluster.size > 1 ? COMPUTATION_SIZE / (cluster.size - 1) : COMPUTATION_SIZE;
     while (++i < cluster.size)

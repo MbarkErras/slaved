@@ -86,7 +86,6 @@ static int  assign_nodes_addresses(char **configuration_lines, t_cluster *cluste
         cluster->nodes[i].tasks_queue = t_dstruct_list_init();
         cluster->nodes[i].cluster = cluster;
     }
-    DEBUG("assigning addresses to nodes..\n");
     return (0);
 }
 
@@ -94,23 +93,15 @@ int         get_configuration(char *configuration_file, t_cluster *cluster)
 {
     char    **configuration_lines;
 
-    DEBUG("reading configuration file..\n");
     if (!(configuration_lines = read_configuration_file(configuration_file)))
         return (BAD_CONFIG);
-    DEBUG("getting program fd, assigning nodes addresses..\n");
     if ((cluster->program = get_program_fd(configuration_lines[0])) == -1 ||
         assign_nodes_addresses(configuration_lines, cluster))
     {
-        DEBUG("ERROR: getting program fd, assigning nodes addresses..\n");
         free_char_array(configuration_lines);
         return (BAD_CONFIG);
     }
-    DEBUG("configuration parsing cleanup..\n");
     ft_strdel(&configuration_lines[0]);
     free(configuration_lines);
     return (0);
 }
-
-/* FIXES
-    - configuration should open program and get its fd, report error otherwise.
-*/

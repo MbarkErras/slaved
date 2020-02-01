@@ -91,6 +91,8 @@ void    *slave_routine(void *slave)
 **  - iterate over cluster slaves, and lunch a thread for every slave.
 */
 
+#include <errno.h>
+
 int connect_slaves(t_cluster *cluster)
 {
     int slave_socket;
@@ -115,7 +117,7 @@ int connect_slaves(t_cluster *cluster)
         cluster->nodes[i].socket = err ? -1 : slave_socket;
         if (err)
         {
-            printf("ERROR CONNECTING SLAVE NO %d\n", i);
+            printf("ERROR CONNECTING SLAVE NO %d: %s\n", i, strerror(errno));
             continue ;
         }
         err = ERROR_WRAPPER(pthread_create(&tid, NULL, slave_routine, &(cluster->nodes[i])));
