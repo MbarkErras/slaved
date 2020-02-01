@@ -68,7 +68,6 @@ void    *connect_master(void *slaved)
             accept(CAST(slaved, t_slaved *)->server_socket, (struct sockaddr *)
             &master_address, &address_length)) == -1)
         /*pthread_exit(NULL);*/exit(3);
-        DEBUG("connecting master..\n");
         receive_packets(slaved);
     }
 }
