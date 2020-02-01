@@ -17,4 +17,4 @@
  - to put a mutex in everything.
  - to dequeue a node before enqueuing it to some other queue.
  
- ![](https://i.imgur.com/06GvAzp.png)
+<img src="https://i.imgur.com/06GvAzp.png" width="200"/>
