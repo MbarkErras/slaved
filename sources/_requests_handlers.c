@@ -52,6 +52,7 @@ t_packet  execute_req_computation(t_packet *request, t_program program)
 {
     t_packet response;
     void    *result;
+    int ret;
 
     ret = write(program.w_stdin, &request->size, sizeof(request->size));
     ret = write(program.w_stdin, request->data, request->size);
