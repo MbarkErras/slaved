@@ -33,12 +33,9 @@ void    receive_packets(t_slaved *slaved)
         DEBUG("reading a packet..\n");
         if (read_packet(slaved->connection_socket, &request))
         {
-            DEBUG("error: read_packet()\n");
-            sleep(1);
-            continue ;
+            list_delete(slaved->packets_queue);
+            return ;
         }
-        DEBUG("a packet receieved!..\n");
-        printf("type: %d\nsize: %d\n", request.type, request.size);
         queue_enqueue(&slaved->packets_queue,
             t_dstruct_create_node(create_packet(request, NULL), sizeof(t_packet)));
     }
@@ -52,7 +49,7 @@ void    *connect_master(void *slaved)
     socklen_t           address_length;
 
     if ((CAST(slaved, t_slaved *)->server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        /*pthread_exit(NULL);*/exit(1);
+        pthread_exit(NULL);
     ft_bzero(&slave_address, sizeof(slave_address));
     ft_bzero(&master_address, sizeof(master_address));
     slave_address.sin_family = AF_INET;
@@ -61,14 +58,15 @@ void    *connect_master(void *slaved)
     if (bind(CAST(slaved, t_slaved *)->server_socket, (struct sockaddr *)&slave_address,
         sizeof(slave_address)) ||
         listen(CAST(slaved, t_slaved *)->server_socket, 1))
-        /*pthread_exit(NULL);*/exit(2);
+        pthread_exit(NULL);
     while (1)
     {
         if ((CAST(slaved, t_slaved *)->connection_socket =
             accept(CAST(slaved, t_slaved *)->server_socket, (struct sockaddr *)
             &master_address, &address_length)) == -1)
-        /*pthread_exit(NULL);*/exit(3);
+            pthread_exit(NULL);
         receive_packets(slaved);
+        close(CAST(slaved, t_slaved *)->connection_socket);
     }
 }
 
@@ -82,6 +80,7 @@ int main(void)
     slaved.packets_queue = t_dstruct_list_init();
 
     err = ERROR_WRAPPER(pthread_create(&tid, NULL, connect_master, &slaved));
-    err = ERROR_WRAPPER(handle_packets(&slaved));
+    err = ERROR_WRAPPER(pthread_create(&tid, NULL, handle_packets, &slaved));
+
     return (err);
 }
