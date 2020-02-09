@@ -10,6 +10,7 @@
 # include <arpa/inet.h>
 # include <sys/types.h>
 # include <sys/time.h>
+# include <signal.h>
 
 # define EXEC_NAME "slaved: "
 # define SLAVED_PROGRAM_NAME "slaved_program"
@@ -30,23 +31,16 @@
 # define DEBUG(x) printf(DEBUG_P ? x : "")
 // /!\ D E V
 
-typedef struct  s_program
-{
-    pid_t       pid;
-    int         w_stdin;
-    int         r_stdout;
-}               t_program;
-
 typedef struct  s_slaved
 {
     int             server_socket;
+    pthread_mutex_t packets_queue_mx;
     int             connection_socket;
     t_dstruct_list  packets_queue;
-    t_program       program;
+    void            *computation;
+    pthread_t       tid[2];
     uint8_t         flags;
 }               t_slaved;
-
-t_packet  requests_dispatcher(t_packet *request, t_slaved *slaved);
 
 /*
 ** SLAVED FLAGS
