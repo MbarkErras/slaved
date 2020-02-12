@@ -6,6 +6,7 @@ typedef struct  s_program
     pid_t       pid;
     int         w_stdin;
     int         r_stdout;
+    int         
 }               t_program;
 
 void    *init_computation();
@@ -29,5 +30,8 @@ t_packet  execute_req_computation(t_packet *request, t_program *program);
 
 # define TYPE_T_RESPONSE_SUCCESS 0
 # define TYPE_T_RESPONSE_FAILURE 1
+
+# define TEXTURES_DIR "textures"
+# define TEXTURES_FILENAME_SIZE 16
 
 #endif
